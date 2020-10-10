@@ -83,8 +83,43 @@ def all_tasks():
         print()
 
 
-def delete_tasks():
-    pass
+def delete_task():
+    rows = session.query(Table).order_by(Table.deadline).all()
+    if len(rows) > 0:
+        print("Choose the number of the task you want to delete: ")
+        j = 0
+        for row in rows:
+            j += 1
+            print(str(j) + ". ", end="")
+            print(row, end="")
+            print(Table.str_deadline(row))
+        number = int(input())
+        j = 0
+        for row in rows:
+            j += 1
+            if j == number:
+                session.delete(row)
+                session.commit()
+                print("The task has been deleted!")
+
+    else:
+        print("Nothing to delete")
+
+
+def missed_tasks():
+    print("Missed tasks:")
+    rows = session.query(Table).filter(Table.deadline < datetime.today().date()).order_by(Table.deadline).all()
+    if len(rows) > 0:
+        j = 0
+        for row in rows:
+            j += 1
+            print(str(j) + ". ", end="")
+            print(row, end="")
+            print(Table.str_deadline(row))
+        print()
+    else:
+        print("Nothing is missed!")
+        print()
 
 
 def main_menu():
@@ -92,7 +127,9 @@ def main_menu():
         print("1) Today's tasks")
         print("2) Week's tasks")
         print("3) All tasks")
-        print("4) Add task")
+        print("4) Missed tasks")
+        print("5) Add task")
+        print("6) Delete task")
         print("0) Exit")
         usr_input = int(input())
         if usr_input == 0:
@@ -104,7 +141,11 @@ def main_menu():
         elif usr_input == 3:
             all_tasks()
         elif usr_input == 4:
+            missed_tasks()
+        elif usr_input == 5:
             add_task()
+        elif usr_input == 6:
+            delete_task()
 
 
 engine = create_engine('sqlite:///todo.db?check_same_thread=False')
